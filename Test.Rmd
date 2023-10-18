@@ -1,0 +1,42 @@
+---
+title: "Imaging compression via wavelets"
+author: "Pablo Vicente Martínez"
+date: "2023-10-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(imager) #Librería para imprtar imágenes y poder procesarlas
+library(waveslim) #Librería para la transformación por wavelets
+
+image_path <- "./data/Lena.png"
+my_image <- load.image(image_path)
+
+#Si la imagen está en RGB, la querremos convertir a escala d egrises pro simplicidad
+#my_image <- grayscale(my_image)
+
+# Aplicamos DWT
+coeffs <- dwt(my_image, wf = "haar")
+
+# Extract the coefficients
+LL <- coeffs$d1
+LH <- coeffs$d2
+HL <- coeffs$d3
+HH <- coeffs$d4
+
+# Reconstruct the image using IDWT
+reconstructed_image <- idwt(LL, list(LH, HL, HH), filter = "haar")
+
+# Aoplicamos la DWT inversa
+compressed_image <- idwt(coeffs)
+
+# Guardamos la imagen
+#save.image(compressed_image, "./data/compressed_image.jpg")
+
+plot(my_image)
+```
+
