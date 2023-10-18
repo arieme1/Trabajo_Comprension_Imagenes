@@ -20,23 +20,151 @@ my_image <- load.image(image_path)
 #my_image <- grayscale(my_image)
 
 # Aplicamos DWT
-coeffs <- dwt(my_image, wf = "haar")
-
-# Extract the coefficients
-LL <- coeffs$d1
-LH <- coeffs$d2
-HL <- coeffs$d3
-HH <- coeffs$d4
+coeffs <- dwt.2d(my_image, wf = "haar")
 
 # Reconstruct the image using IDWT
-reconstructed_image <- idwt(LL, list(LH, HL, HH), filter = "haar")
-
-# Aoplicamos la DWT inversa
-compressed_image <- idwt(coeffs)
+reconstructed_image <- idwt.2d(coeffs)
+compressed_image <- as.cimg(reconstructed_image)
 
 # Guardamos la imagen
 #save.image(compressed_image, "./data/compressed_image.jpg")
 
 plot(my_image)
+plot(compressed_image)
+
+```
+
+
+# A PARTIR DE AQUÍ SON TODO PRUEBAS QUE NO QUIERO BORRAR POR SI SIRVIESE ALGO, LO QUE FUNCIONA ES LO DE ARRIBA
+
+
+--------------------------------------------------------------------------------------
+
+```{r}
+library(imager) #Librería para imprtar imágenes y poder procesarlas
+library(wavethresh)
+
+# Load an example image (replace with your own image path)
+image <- load.image("./data/Lena.png")  # Use your image file path
+
+# Set compression parameters
+compression_ratio <- 0.5  # Adjust as needed
+nlevels <- 4  # Number of wavelet decomposition levels
+
+# Perform wavelet compression
+compressed_image <- imwd(image,bc = "symmetric", filter.number = 10)
+
+# Decompress the image
+reconstructed_image <- imwr(compressed_image)
+
+# Display the original and reconstructed images
+par(mfrow = c(1, 2))
+plot(image, main = "Original Image")
+plot(reconstructed_image, main = "Reconstructed Image")
+
+
+
+```
+
+
+-----------------------------------------------------------------------------------------------------------
+
+
+```{r}
+# Load the required library
+library(imager)
+library(WaveletComp)
+
+# Load an image (replace 'your_image.jpg' with your image file)
+image_file <- "./data/Lena.png"
+original_image <- load.image(image_file) 
+
+# Define the wavelet type (e.g., "haar," "db1," "bior3.5," "coif1," etc.)
+wavelet_type <- "haar"
+
+# Perform wavelet transformation
+wavelet_result <- wt(original_image, wt.filter(wavelet_type))
+
+# Specify the compression ratio (e.g., 0.1 for 10% compression)
+compression_ratio <- 0.1
+
+# Compress the image
+compressed_image <- ic(wavelet_result, cr = compression_ratio)
+
+# Reconstruct the compressed image
+reconstructed_image <- iwt(compressed_image)
+
+# Plot the original and reconstructed images
+par(mfrow=c(1,2))
+image(original_image, main = "Original Image")
+image(reconstructed_image, main = "Reconstructed Image")
+
+# Save the reconstructed image
+writeJPEG(reconstructed_image, "reconstructed_image.jpg")
+
+# Calculate compression ratio and PSNR
+original_size <- file.info(image_file)$size
+compressed_size <- file.info("reconstructed_image.jpg")$size
+compression_ratio <- original_size / compressed_size
+psnr <- PSNR(original_image, reconstructed_image)
+
+cat("Compression Ratio:", round(compression_ratio, 2), "\n")
+cat("Peak Signal-to-Noise Ratio (PSNR):", round(psnr, 2), "dB\n")
+
+```
+
+
+```{r}
+# Install and load the 'WaveThresh' library
+library(imager)
+library(wavethresh)
+
+# Load your image (replace 'your_image.jpg' with your image file)
+image_file <- "./data/Lena.png"
+original_image <- load.image(image_file) 
+
+
+# Define the wavelet type (e.g., "haar," "db1," "bior3.5," "coif1," etc.)
+wavelet_type <- "haar"
+
+# Perform wavelet transformation
+wavelet_result <- dwt(original_image, filter = wavelet_type)
+
+# Specify the compression ratio (e.g., 0.1 for 10% compression)
+compression_ratio <- 0.1
+
+# Compress the image
+compressed_image <- wd(wavelet_result, threshold = "hard", adapt = TRUE, rule = "BayesShrink", level = compression_ratio)
+
+# Reconstruct the compressed image
+reconstructed_image <- idwt(compressed_image)
+
+# Plot the original and reconstructed images
+par(mfrow=c(1,2))
+image(original_image, main = "Original Image")
+image(reconstructed_image, main = "Reconstructed Image")
+
+# Save the reconstructed image
+writeJPEG(reconstructed_image, "reconstructed_image.jpg")
+
+# Calculate compression ratio
+original_size <- file.info(image_file)$size
+compressed_size <- file.info("reconstructed_image.jpg")$size
+compression_ratio <- original_size / compressed_size
+
+cat("Compression Ratio:", round(compression_ratio, 2), "\n")
+
+```
+
+```{r}
+# Install and load the 'WaveThresh' library
+library(imager)
+library(wavethresh)
+
+# Load your image (replace 'your_image.jpg' with your image file)
+image_file <- "./data/Lena.png"
+original_image <- load.image(image_file) 
+
+plot.imwd(original_image)
 ```
 
