@@ -23,9 +23,8 @@ class ImageViewerApp:
         self.canvas.pack(pady = 5)
 
         # Cargar imagen por defecto
-        image_path = "default.jpg"
-        image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), image_path)
-        self.load_image(image_path)
+        self.original_image_path = "default.jpg"
+        self.load_image(self.original_image_path)
         self.update_image(image_type = "original")
 
         # Panel de botones
@@ -37,11 +36,15 @@ class ImageViewerApp:
         self.load_button.grid(row = 0, column = 0, padx = 1, pady = 2)
 
         # Label de imagen cargada
-        self.image_dir_text = tk.Label(master = self.frm_buttons, text = image_path, background = "white", relief = tk.SUNKEN)
-        self.image_dir_text.grid(row = 0, column = 1, columnspan = 2, padx = 1, pady = 2)
+        self.image_dir_text = tk.Label(master = self.frm_buttons, text = self.original_image_path, background = "white", relief = tk.SUNKEN)
+        self.image_dir_text.grid(row = 0, column = 1, padx = 1, pady = 2)
+
+        # Botón para corregir orientación
+        self.rotate_button = tk.Button(master = self.frm_buttons, text = "Corregir rotación", command = self.on_rotate_button_click)
+        self.rotate_button.grid(row = 0, column = 2, columnspan = 2, padx = 1, pady = 2)
 
         # Label de la familia
-        self.family_text = tk.Label(master = self.frm_buttons, text="Familia seleccionada:")
+        self.family_text = tk.Label(master = self.frm_buttons, text = "Familia:")
         self.family_text.grid(row = 1, column = 0, padx = 1, pady = 2)
 
         # Dropdown para seleccionar familia
@@ -51,47 +54,68 @@ class ImageViewerApp:
         self.family_dropdown = tk.OptionMenu(self.frm_buttons, self.family, *family_options, command = self.on_family_dropdown_change)
         self.family_dropdown.grid(row = 1, column = 1, padx = 1, pady = 2)
 
+        # Label de la wavelet
+        self.wavelet_text = tk.Label(master = self.frm_buttons, text = "Wavelet:")
+        self.wavelet_text.grid(row = 1, column = 2, padx = 1, pady = 2)
+
         # Dropdown para seleccionar wavelet
         wavelet_options = pywt.wavelist(family = self.family.get(), kind = 'discrete')
         self.wavelet = tk.StringVar(master = self.frm_buttons)
         self.wavelet.set(wavelet_options[0])
         self.wavelet_dropdown = tk.OptionMenu(self.frm_buttons, self.wavelet, *wavelet_options)
-        self.wavelet_dropdown.grid(row = 1, column = 2, padx = 1, pady = 2)
+        self.wavelet_dropdown.grid(row = 1, column = 3, padx = 1, pady = 2)
 
         # Label de la familia
         self.threshold_text = tk.Label(master = self.frm_buttons, text = "Threshold")
         self.threshold_text.grid(row = 2, column = 0, padx = 1, pady = 2)
 
         # Input numérico del threshold
-        self.threshold = tk.Entry(master = self.frm_buttons, width = 10)
-        self.threshold.insert(0, '220')
-        self.threshold.grid(row = 2, column = 1, padx = 1, pady = 2)
+        self.threshold = tk.StringVar(master = self.frm_buttons)
+        self.threshold.set("200")
+        self.threshold_spinbox = tk.Spinbox(master = self.frm_buttons, width = 10, from_ = 1, to = 500, textvariable = self.threshold)
+        self.threshold_spinbox.grid(row = 2, column = 1, padx = 1, pady = 2)
 
         # Botón de comprimir imagen
         self.compress_button = tk.Button(master = self.frm_buttons, text = "Comprimir imagen", command = self.on_compress_button_click)
-        self.compress_button.grid(row = 3, column = 0, padx = 1, pady = 2)
-
+        self.compress_button.grid(row = 3, column = 0, columnspan = 4, padx = 1, pady = 2)
+    
     def on_load_image_button_click(self):
         image_path = filedialog.askopenfilename(title = "Seleccionar imagen", filetypes = [("Archivos de imagen", "*.png;*.jpg;*.jpeg;*.gif;gorila")])
         self.load_image(image_path)
         if self.original_image:
             self.update_image(image_type = "original")
 
-    def load_image(self, image_path):
+    def load_image(self, image_path, rotate = False):
         if image_path:
             image_obj = Image.open(image_path)
+            img_array = np.array(image_obj)
+            if rotate:
+                img_array = np.fliplr(np.transpose(img_array, (1, 0, 2)))
+                image_obj = Image.fromarray(img_array)
             image_obj = image_obj.resize((int(self.frm_w / 2), self.frm_h), Image.LANCZOS) # CALCULAR RESIZE PARA MANTENER PROPORCIONES
             image_obj = ImageTk.PhotoImage(image_obj)
-            self.original_image_path = image_path
-            self.original_image = image_obj
+            self.original_image_path  = image_path
+            self.original_image_array = img_array
+            self.original_image       = image_obj
         else:
             self.original_image = False
 
+    def on_rotate_button_click(self):
+        if self.original_image_path:
+            self.load_image(self.original_image_path, rotate = True)
+            self.update_image(image_type = "original")
+
     def update_image(self, image_type):
         if image_type == "original":
-            self.canvas.create_image(0, 0, anchor = tk.NW, image = self.original_image)
+            if self.original_image:
+                self.canvas.create_image(0, 0, anchor = tk.NW, image = self.original_image)
+            else:
+                pass
         elif image_type == "compressed":
-            self.canvas.create_image(int(self.frm_w / 2), 0, anchor = tk.NW, image = self.compressed_image)
+            if self.compressed_image:
+                self.canvas.create_image(int(self.frm_w / 2), 0, anchor = tk.NW, image = self.compressed_image)
+        else:
+            pass
         return self
 
     def on_family_dropdown_change(self, *args):
@@ -107,12 +131,16 @@ class ImageViewerApp:
         if status:
             self.update_image(image_type = "compressed")
 
-    def compress_image(self):
+    def compress_image(self, default_threshold = 200):
         wavelet = self.wavelet.get()
-        threshold = float(self.threshold.get())
-        
-        img = Image.open(self.original_image_path)
-        img_array = np.array(img)
+        try:
+            threshold = float(self.threshold.get())
+        except ValueError as e:
+            messagebox.showwarning("Error", str(e))
+            threshold = default_threshold
+            self.threshold.set(str(threshold))
+                
+        img_array = self.original_image_array
         r, g, b = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
 
         # Aplicar wavelet en cada canal y hallar coeficientes
