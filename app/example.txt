@@ -1,0 +1,10 @@
+MetaDatos de la compresión de la imagen: default.jpg
+
+ - Imagen comprimida: D:/repos/Trabajo_Comprension_Imagenes/app/example.jpg
+ - Familia de wavelets: haar
+ - Wavelet: haar
+ - Threshold: 200.0
+
+ - Tamaño de la imagen original: 1868.8779296875 kB
+ - Tamaño de la imagen comprimida: 451.845703125 kB
+ - Porcentaje de compresión: 76 %
