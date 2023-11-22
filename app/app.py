@@ -8,8 +8,9 @@ class Wavelet_compressor:
     def __init__(self, root):
         self.root = root
         self.root.title("Compresor WAVELETS de imágenes")
-        self.root.geometry("800x600+10+10")
+        self.root.geometry("800x630+10+10")
 
+        self.original_image_path = ''
         self.is_original_image   = False
         self.is_compressed_image = False
 
@@ -24,11 +25,6 @@ class Wavelet_compressor:
         self.frm_canvas.pack()
         self.canvas = tk.Canvas(master = self.frm_canvas, width = self.frm_w, height = self.frm_h, background = "white")
         self.canvas.pack(pady = 5)
-
-        # Cargar imagen por defecto
-        self.original_image_path = "default.jpg"
-        self.load_image(self.original_image_path)
-        self.update_image(image_type = "original")
 
         # Paneles de botones
         self.frm_master_buttons = tk.Frame(master = self.root)
@@ -55,10 +51,27 @@ class Wavelet_compressor:
         # Botón para corregir orientación
         self.rotate_button = tk.Button(master = self.frm_img_buttons, text = "Corregir rotación", command = self.on_rotate_button_click)
         self.rotate_button.grid(row = 2, column = 0, columnspan = 2, padx = 1, pady = 2)
+        self.rotate = False
 
-        # Botón para corregir orientación
+        # Label del witch
+        self.frm_switch_text = tk.Label(master = self.frm_img_buttons, text = "Modo de color")
+        self.frm_switch_text.grid(row = 3, column = 0, padx = 1, pady = 2)
+
+        # Switch de color / b&w
+        self.frm_switch = tk.Frame(master = self.frm_img_buttons)
+        self.frm_switch.grid(row = 3, column = 1, padx = 1, pady = 2)
+
+        # Botones del switch
+        self.switch_variable = tk.StringVar(master = self.frm_switch, value = "color")
+        self.color_mode = self.switch_variable.get()
+        self.switch_to_color = tk.Radiobutton(self.frm_switch, text = "Color", variable = self.switch_variable, indicatoron = False, value = "color", command = self.on_switch_color_click)
+        self.switch_to_color.grid(row = 0, column = 0, padx = 1)
+        self.switch_bw = tk.Radiobutton(self.frm_switch, text = "B&W", variable = self.switch_variable, indicatoron = False, value = "bw", command = self.on_switch_color_click)
+        self.switch_bw.grid(row = 0, column = 1, padx = 1)
+
+        # Botón para guardar imagen
         self.save_button = tk.Button(master = self.frm_img_buttons, text = "Guardar imagen", command = self.on_save_button_click)
-        self.save_button.grid(row = 3, column = 0, columnspan = 2, padx = 1, pady = 2)
+        self.save_button.grid(row = 4, column = 0, columnspan = 2, padx = 1, pady = 2)
 
         # Label de la familia
         self.family_text = tk.Label(master = self.frm_cmpr_buttons, text = "Familia:")
@@ -95,6 +108,11 @@ class Wavelet_compressor:
         # Botón de comprimir imagen
         self.compress_button = tk.Button(master = self.frm_cmpr_buttons, text = "Comprimir imagen", command = self.on_compress_button_click)
         self.compress_button.grid(row = 3, column = 0, columnspan = 4, padx = 1, pady = 2)
+
+        # Cargar imagen por defecto
+        self.original_image_path = "default.jpg"
+        self.load_image(self.original_image_path)
+        self.update_image(image_type = "original")
     
     def on_load_image_button_click(self):
         image_path = filedialog.askopenfilename(title = "Seleccionar imagen", filetypes = [("Archivos de imagen", "*.png;*.jpg;*.jpeg;*.gif;gorila")])
@@ -102,22 +120,37 @@ class Wavelet_compressor:
             self.load_image(image_path)
             self.update_image(image_type = "original")
 
-    def load_image(self, image_path, rotate = False):
-        image_obj = Image.open(image_path)
-        img_array = np.array(image_obj)
-        if rotate:
-            img_array = np.fliplr(np.transpose(img_array, (1, 0, 2)))
-            image_obj = Image.fromarray(img_array)
+    def load_image(self, image_path):
+        if self.color_mode == "color":
+            image_obj = Image.open(image_path)
+            img_array = np.array(image_obj)
+            if self.rotate:
+                img_array = np.fliplr(np.transpose(img_array, (1, 0, 2)))
+                image_obj = Image.fromarray(img_array)
+        elif self.color_mode == "bw":
+            image_obj = Image.open(image_path).convert("L")
+            img_array = np.array(image_obj)
+            if self.rotate:
+                img_array = np.fliplr(np.transpose(img_array, (1, 0)))
+                image_obj = Image.fromarray(img_array)
         image_obj = image_obj.resize((int(self.frm_w / 2), self.frm_h), Image.LANCZOS) # CALCULAR RESIZE PARA MANTENER PROPORCIONES
         image_obj = ImageTk.PhotoImage(image_obj)
         self.original_image_path  = image_path
+        self.image_dir_text.config(text = self.original_image_path)
         self.original_image_array = img_array
         self.original_image       = image_obj
-        self.is_original_image = True
+        self.is_original_image    = True
 
     def on_rotate_button_click(self):
         if self.is_original_image:
-            self.load_image(self.original_image_path, rotate = True)
+            self.rotate = True
+            self.load_image(self.original_image_path)
+            self.update_image(image_type = "original")
+
+    def on_switch_color_click(self):
+        if self.is_original_image:
+            self.color_mode = self.switch_variable.get()
+            self.load_image(self.original_image_path)
             self.update_image(image_type = "original")
 
     def update_image(self, image_type):
@@ -166,6 +199,7 @@ class Wavelet_compressor:
                         metadata_path = output_image_path[:last_period_index] + '.txt'
                         metadata = f"MetaDatos de la compresión de la imagen: {self.original_image_path}\n\n" +\
                             f" - Imagen comprimida: {output_image_path}\n" +\
+                            f" - Blanco y negro: {self.used_config['is_bw']}\n" +\
                             f" - Familia de wavelets: {self.used_config['f']}\n" +\
                             f" - Wavelet: {self.used_config['w']}\n" +\
                             f" - Threshold: {self.used_config['t']}\n\n" +\
@@ -192,8 +226,10 @@ class Wavelet_compressor:
         status = self.compress_image()
         if status:
             self.update_image(image_type = "compressed")
+        else:
+            messagebox.showwarning('Error', 'Ha ocurrido un error durante la compresión de la imagen.')
 
-    def compress_image(self, default_threshold = 200):
+    def compress_image(self, default_threshold = 200, gray_scale = False):
         wavelet = self.wavelet.get()
         try:
             threshold = float(self.threshold.get())
@@ -206,9 +242,8 @@ class Wavelet_compressor:
                 messagebox.showwarning("Error", 'El threshold debe ser positivo y menor que 500.')
                 threshold = default_threshold
                 self.threshold.set(str(threshold))
-        self.used_config = {'f': self.family.get(), 'w': wavelet, 't': threshold}
+        self.used_config = {'f': self.family.get(), 'w': wavelet, 't': threshold, 'is_bw': 'Sí' if self.color_mode == 'bw' else 'No'}
         img_array = self.original_image_array
-        r, g, b = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
 
         # Aplicar wavelet en cada canal y hallar coeficientes
         def apply_wavelet(channel, wavelet):
@@ -220,39 +255,62 @@ class Wavelet_compressor:
             else:
                 cA, (cH, cV, cD) = coeffs
             return coeffs
-
-        # Coeficientes R, G y B
-        r_coeffs = apply_wavelet(r, wavelet)
-        g_coeffs = apply_wavelet(g, wavelet)
-        b_coeffs = apply_wavelet(b, wavelet)
-
-        if all((r_coeffs, g_coeffs, b_coeffs)):
-            cA, (cH, cV, cD) = r_coeffs
-            r_coeffs = cA, cH, cV, cD
-            cA, (cH, cV, cD) = g_coeffs
-            g_coeffs = cA, cH, cV, cD
-            cA, (cH, cV, cD) = b_coeffs
-            b_coeffs = cA, cH, cV, cD
-        else:
-            return False
-
-        # Meter threshold en coeficientes para la compresión
-        r_coeffs_compressed = [pywt.threshold(i, value = threshold, mode = 'garrote') for i in r_coeffs]
-        g_coeffs_compressed = [pywt.threshold(i, value = threshold, mode = 'garrote') for i in g_coeffs]
-        b_coeffs_compressed = [pywt.threshold(i, value = threshold, mode = 'garrote') for i in b_coeffs]
-
+        
         # Reconstrucción de canales tras la compresión
         def reconstruct_channel(cA, cH, cV, cD, wavelet_type):
             coeffs = (cA, (cH, cV, cD))
             reconstructed_channel = pywt.idwt2(coeffs, wavelet_type)
             return reconstructed_channel
+        
+        # Comprobar que todos los coeficientes son válidos
+        def all_coeffs_true(coeffs):
+            for item in coeffs:
+                try:
+                    if not item:
+                        return False
+                except ValueError:
+                    continue
+            return True
 
-        reconstructed_r = reconstruct_channel(*r_coeffs_compressed, wavelet)
-        reconstructed_g = reconstruct_channel(*g_coeffs_compressed, wavelet)
-        reconstructed_b = reconstruct_channel(*b_coeffs_compressed, wavelet)
+        if self.color_mode == "bw":
+            bw = img_array[:, :]
+            coeffs = apply_wavelet(bw, wavelet)
+            if all_coeffs_true(coeffs):
+                cA, (cH, cV, cD) = coeffs
+                coeffs = cA, cH, cV, cD
+            else:
+                return False
+            coeffs_compressed = [pywt.threshold(i, value=threshold, mode = 'garrote') for i in coeffs]
+            reconstructed_image_array = reconstruct_channel(*coeffs_compressed, wavelet)
+        elif self.color_mode == "color":
+            # Coeficientes R, G y B
+            r, g, b = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
+            r_coeffs = apply_wavelet(r, wavelet)
+            g_coeffs = apply_wavelet(g, wavelet)
+            b_coeffs = apply_wavelet(b, wavelet)
 
-        # Reconstrucción de la imagen a partir de los canales
-        reconstructed_image_array = np.stack((reconstructed_r, reconstructed_g, reconstructed_b), axis=-1)
+            if all_coeffs_true((r_coeffs, g_coeffs, b_coeffs)):
+                cA, (cH, cV, cD) = r_coeffs
+                r_coeffs = cA, cH, cV, cD
+                cA, (cH, cV, cD) = g_coeffs
+                g_coeffs = cA, cH, cV, cD
+                cA, (cH, cV, cD) = b_coeffs
+                b_coeffs = cA, cH, cV, cD
+            else:
+                return False
+
+            # Meter threshold en coeficientes para la compresión
+            r_coeffs_compressed = [pywt.threshold(i, value = threshold, mode = 'garrote') for i in r_coeffs]
+            g_coeffs_compressed = [pywt.threshold(i, value = threshold, mode = 'garrote') for i in g_coeffs]
+            b_coeffs_compressed = [pywt.threshold(i, value = threshold, mode = 'garrote') for i in b_coeffs]
+
+            reconstructed_r = reconstruct_channel(*r_coeffs_compressed, wavelet)
+            reconstructed_g = reconstruct_channel(*g_coeffs_compressed, wavelet)
+            reconstructed_b = reconstruct_channel(*b_coeffs_compressed, wavelet)
+
+            # Reconstrucción de la imagen a partir de los canales
+            reconstructed_image_array = np.stack((reconstructed_r, reconstructed_g, reconstructed_b), axis=-1)
+
         reconstructed_image_array = np.clip(reconstructed_image_array, 0, 255).astype(np.uint8)
         reconstructed_image = Image.fromarray(reconstructed_image_array)
         reconstructed_image = reconstructed_image.resize((int(self.frm_w / 2), self.frm_h), Image.LANCZOS) # CALCULAR RESIZE PARA MANTENER PROPORCIONES
