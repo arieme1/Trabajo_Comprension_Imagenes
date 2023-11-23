@@ -250,112 +250,112 @@ Observamos que el *threshold final* que nos ofrece esta función sería 290. La 
   \label{fig:threshold_image}
 \end{figure}
 
-### Compresión de imágenes multi-level
 
-**MIGUEL¿?**
+### Descomposición multinivel de imágenes
 
-Índice de Similitud Estructural (SSIM): 0.7848317931724772
-
-Error Cuadrático Medio (MSE): 254.84636306762695
+La librería PyWavelets incorpora numerosas funciones para aplicar transformaciones wavelet a señales n-dimensionales. En este trabajo, ya que nos centramos en imágenes (señales bidimensionales), empleamos principalmente las funciones dwt2 e idwt2, que nos permiten obtener la descomposición wavelet de nuestras imágenes y reconstruirlas a partir de los coeficientes de la transformación.  Además de estas funciones, PyWavelets también incorpora las funciones wavede2 y waverec2 para el análisis multirresolución de las imágenes aplicando el algoritmo de Mallat. En este algoritmo, un nuevo nivel de descomposición se logra al aplicar de nuevo la transformación wavelet sobre los coeficietnes de aproximación el nivel anterior.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\textwidth]{./data/Memoria/py-lena-comp-miguel.png}
-  \caption{ESCRIBIR}
-  \label{fig:miguel-fig-1}
+  \includegraphics[width=0.8\textwidth]{./data/Memoria/descomposicion_multinivel.png}
+  \caption{RepresentaciÓn esquemática de la descomposición de una imagen en distintos niveles aplicando el algoritmo de Mallat.}
+  \label{fig:descomposicion_niveles}
 \end{figure}
 
-#### Nivel máximo de descomposición
+El algoritmo de Mallat para señales bidimensionales, igual que en el caso bidimensional, emplea bancos de filtros para producir la transformada wavelet discreta. Estos bancos de filtros son esencialmente filtros de pasa baja y de pasa alta, y pueden ser distintos (dependiendo del tipo de wavelet) en los procesos de descomposición y recomposición.
 
-La función dwtn_max_level de la librería pywavelets devuelve el nivel máximo de descomposción en que podemos comprimir la imagen (por ejemplo utilizando las función wavedec2) con una determinada familia de wavelets. Esta función es en realidad una generalización para señales n-dimensionales de la función dwt_max_level, la cuál determina el nivel máximo para la descomposición de una señal unidimensional. La función dwt_max_level calcula el nivel máximo de descomposición como el nivel donde hay al menos un coeficiente que no se ve afectado por los efectos de borde. Los efectos de borde son problemas que pueden surgir cuando se aplica una transformada wavelet en los bordes de una señal (en este caso la imagen) debido a la naturaleza finita de la señal y al hecho que las funciones wavelet requieren de un número mínimo de muestras para calcularse adecuadamente. También se puede interpretar este nivel máximo como si la descomposición parase cuando la señal se vuelve más pequeña que la FIR (finite impulse response) del filtro asociado a la wavelet. La expresión analítica de este nivel viene dada por:
 
-max_level = log_2[data_len/(filter_len - 1)] donde data_len y filter_len son los tamaños de la señal original y el filtro respectivamente,
+**Descomposición multinivel de una señal 2D**
 
-En el caso de señales n-dimensionales, el nivel máximo de descomposición es el mínimo de los niveles máximos calcukados para todos los n ejes.
+En la figura \ref{fig:2D_DWT} se muestra un esquema del algoritmo de descomposición de una señal bidimensional mediante el método de Mallat. Partimos de la subseñal de aproximación del nivel anterior (que en el caso del nievl 0 se corresponde con la señal orginal) y la descomponemos en otras subseñales de aproximación y detalles.
+
++ En primer lugar, las filas de la señal de aproximación del nivel anterior (en la primera iteración la imagen o señal bidimensional original) se convolucionan con los filtros de pasa alta y de pasa baja por separado, dando dos señales distintas.
+
++ Posteriormente, las columnas de estas señales son submuestreadas por un factor dos, quedándonos solo con la mitad de las columnas.
+
++ Después, a cada una de estas dos señales se les vuelven a aplicar los dos filtros de descomposición por separado, dando lugar a cuatro subseñales distintas.
+
++ Cada una de estas subseñales es de nuevo submuestreada, esta vez en las filas, de modo que nos quedamos con la mitad de las filas. Estas cuatro subseñales constituyen ahora las señales de aproximación y detalles horizontal, vertical y diagonal del siguiente nivel. La señal de aproximación es aquella que ha sido convolucionada con el filtro de pasa baja dos veces, la subseñal de detalles horizontales primero recibe un filtro de pasa baja y luego un filtro de pasa alta, mientras que la de detalles verticales es al contrario. Por último, la subseñal de detalles diagonales es aquella que ha recibido dos veces el filtro de pasa alta en el proceso de su creación.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\textwidth]{./data/Memoria/py-max-descomp.png}
-  \caption{Representación de la descomposición por niveles en Python.}
-  \label{fig:miguel-fig-2}
+  \includegraphics[width=0.5\textwidth]{./data/Memoria/2D_DWT.jpg}
+  \caption{Esquema del algoritmo de Mallat para la descomposición multinivel de señales 2D.}
+  \label{fig:2D_DWT}
 \end{figure}
 
-#### Métodos de comparación de la imagen original y la comprimida
+**Recomposición de una señal 2D descompuesta en niveles**
+
+En la figura \ref{fig:2D_IDWT} se muestra un esquema del algoritmo de recomposición de una señal bidimensional mediante el método de Mallat. Partimos de las subseñales de aproximación y detalles de un nivel superior para recuperar a partir de ellas la subseñal de aproximación del nivel anterior (que en el nivel 0 se correspondería con la señal original)
+
++ En primer lugar se aplica un muestreo ascendente a las filas de las subseñales de aproximación y detalle, añadiendo ceros a las columnas impares.
+
++ Posteriormente, a las columnas de las señales obtenidas de las subseñales de aproximación y detalles verticales se les aplica el filtro de pasa baja de reconstrucción y a las columnas de las otras dos el filtro de pasa alta de reconstrucción.
+
++ Las señales obtenidas de la subseñal de aproximacion y de detalles horizontales se suman, así como las señales obtenidas a partir de los detalles verticales y diagonales, por lo que ahora contamos con dos señales distintas.
+
++ A estas dos señales se les vulve a aplicar un muestreo ascendente, esta vez sobre las columnas, insertando dolumnas de ceros en los índices impares.
+
++ La señal obtenida de la suma de aproximaciones y detalles horizanteles es convolucionada con el filtro de pasa baja de reconstrucción y la otra, obtenida a partir de los detalles verticales y diagonales, se convoluciona con el filtro de pasa alta de recuperación.
+
++ Estas dos últimas señales obtenidas de la convolución se añaden para reconstruir la subseñal de aproximación del nivel anterior.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{./data/Memoria/2D_IDWT.jpg}
+  \caption{Esquema del algoritmo de Mallat para la recomposición multinivel de señales 2D.}
+  \label{fig:2D_IDWT}
+\end{figure}
+
+#### Nivel de descomposición máximo
+
+La función dwtn_max_level de la librería PyWavelets devuelve el nivel máximo de descomposción en que podemos descomponer una imagen de un determinado tamaño (por ejemplo utilizando las función wavedec2) con una determinada familia de wavelets. Esta función es en realidad una generalización para señales n-dimensionales de la función dwt_max_level, la cuál determina el nivel máximo para la descomposición de una señal unidimensional. La función dwt_max_level calcula el nivel máximo de descomposición como el nivel donde hay al menos un coeficiente que no se ve afectado por los efectos de borde. Los efectos de borde son problemas que pueden surgir cuando se aplica una transformada wavelet en los bordes de una señal (en este caso la imagen) debido a la naturaleza finita de la señal y al hecho que las funciones wavelet requieren de un número mínimo de muestras para calcularse adecuadamente. También se puede interpretar este nivel máximo como si la descomposición parase cuando la señal se vuelve más pequeña que la FIR (finite impulse response) del filtro asociado a la wavelet. La expresión analítica de este nivel viene dada por:
+
+$$max\_level= log_2\left[\frac{data\_len}{filter\_len - 1}\right]$$
+
+donde data_len y filter_len son los tamaños de la señal original y el filtro respectivamente,
+
+En el caso de señales n-dimensionales, el nivel máximo de descomposición es el mínimo de los niveles máximos calculados para todos los n ejes. Por ejemplo, el nivel de descomposición máximo para la imagen mostrada en la Figura \ref{fig:descomposicion_niveles} es 9.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\textwidth]{./data/Memoria/comparacion_niveles.png}
+  \caption{Imagen comprimida (fila superior) anulando la mitad de los coeficientes de detalle de distintos niveles de descomposición y su diferencia con la imagen original (fila inferior),}
+  \label{fig:comparacion_niveles}
+\end{figure}
+
+En la Figura \ref{fig:comparacion_niveles} podemos ver una imagen comprimida descartando el 50% de los coeficientes de detalle de los niveles 1, 2, 3. Vemos que cuando aproximamos a cero los ceoficientes de detalle de un nivel más alto la diferencia de la imagen comprimida con la imagen original afecta a zonas distintas. Esto se debe a que en cada nivel superior los coeficientes de detalle se obtienen a partir de los coeficientes de aproximación del nivel anterior y se seleccionar diferentes bandas de frecuencias (diferentes detalles).
+
+# Métodos de comparación de la imagen original y la comprimida
 
 Una vez reaizada la compresión, resulta siempre interesante comparar la imagen comprimida con la imagen original, ya que típicamente queremos mantener un equilbrio entre la compresión de la imagen y su calidad, de manera que se parezca lo máximo posible a la imagen original.
 
-Como ya hemos comentado anteriormente, para comprimir la imagen por el método de las wavelet, dividimos la información de la imagen en subseñales de aproximación y detalle aplicando a la imagen una (o varias) transformaciones wavelet. Los coeficientes de aproximación proporcionan la teendencia general de los píxeles mientras que los coeficientes de detalle proporcionan los cambios o detalles en las direcciones horizontal, vertical y diagonal de la imagen. Para comprimir la imagen establecemos un umbral o "threshold", que no es más que un valor de los coeficientes de detalle por debajo del cual los coeficientes son aproximados a cero. Cuanto mayor sea el número de ceros, mayor podrá ser la compresión alcanzada. Sin embargo, al hacer cero estos coeficientes se pierde cierta cantidad de información de la imagen original. Cuantos más coeficientes se hagan cero mayor será la compresión pero será mayor la pérdida de información de la imagen original, por lo que se debe buscar un balance entre ambos. Por ello, para cuantificar la compresión de la imagen y su semejanza con la imagen original podemos emplear diversos métodos:
+Como ya hemos comentado anteriormente, para comprimir la imagen por el método de las wavelet, dividimos la información de la imagen en subseñales de aproximación y detalle aplicando a la imagen una (o varias) transformaciones wavelet. Los coeficientes de aproximación proporcionan la tendencia general de los píxeles mientras que los coeficientes de detalle proporcionan los cambios o detalles en las direcciones horizontal, vertical y diagonal de la imagen. Para comprimir la imagen establecemos un umbral o "threshold", que no es más que un valor de los coeficientes de detalle por debajo del cual los coeficientes son aproximados a cero. Cuanto mayor sea el número de ceros, mayor podrá ser la compresión alcanzada. Sin embargo, al hacer cero estos coeficientes se pierde cierta cantidad de información de la imagen original, que será mayor cuantos más coeficientes se aproximen a cero, por lo que se debe buscar un balance entre ambos. Por ello, para cuantificar la compresión de la imagen y su semejanza con la imagen original podemos emplear diversos métodos:
 
 + **Ratio de compresión**
 
-```python
-import os
-
-# Obtener el tamaño de los archivos de las imágenes original y comprimida
-size_original = os.path.getsize('original_image.jpg')  # Tamaño en bytes
-size_compressed = os.path.getsize('compressed_image.jpg')  # Tamaño en bytes
-
-# Calcular el ratio de compresión
-compression_ratio = size_compressed / size_original
-```
-
-El ratio de compresión es el ratio entre el tamaño de la imagen comprimida y la original. Esre ratio es un indicador cuánto se ha comprimido una imagen en particular. Generalmente, cuanto mayor es el ratio de compresión peor es la calidad de la imagen.
+El ratio de compresión es el ratio entre el tamaño de la imagen original y la comprimida. Esre ratio es un indicador cuánto se ha comprimido una imagen en particular. Generalmente, cuanto mayor es el ratio de compresión peor es la calidad de la imagen.
 
 + **Energía perdida**
 
-```python
-import numpy as np
-
-energy_loss = 100*np.sum(compressed_image_arr**2)/np.sum(original_image_arr**2)
-```
 En el contexto del procesado de señales, la energía de una imagen es proporcional a la suma del cuadrado de los valores sus píxeles y es una medida de la información presente en la imagen. Por tanto, la pérdida de información puede cuantificarse en forma de la pérdida de energía de la imagen en tanto por cien (energy loss).
 
 + **Error cuadrático medio**
 
 Otra manera de cuantificar la perdida de información o la diferencia entre la imagen original y la comprimida es mediante el error cuadrático medio, es decir, el error acumulado en cada pixel correspondiente a la imagen original y su análogo en la imagen comprimida al cuadrado.
 
-```python
-import numpy as np
-
-mse = np.sum((original_imagea_arr -  compress_image_arr)**2)/float(original_image_arr-shape[0]*original_image_arr.shape[1])
-```
-
 + **Índice de Medida de Similitud Estructural (SSIM)**
 
 Este índice también sirve para determinar la similitud de dos imágenes. En particular mide la similitud estructural entre ambas, teniendo en cuenta la luminancia, contraste y estructura. Toma valores entre -1 y 1 siendo 1 el índice para imágenes idénticas, por lo que valores próximos a 1 indican alta similitud. La obtención de este índice es más complejo por lo que podemos usar librerías externas para calcularlo.
 
-```python
-from skimage.measure import compare_ssim as ssim
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{./data/Memoria/comparacion_imagenes.png}
+  \caption{Comparación (de zquierda a derecha) de la imagen original, la imagen comprimida y la diferencia entre ambas junto con el ratio de compresión (CP) de la imagen comprimida, el error cuadrático medio (MSE) y el índice de medida de similitud estructural (SSIM).}
+  \label{fig:comparacion_imagenes}
+\end{figure}
 
-ssim_val = ssim(original_img_arr, decoded_img_arr)
-```
-
-+ **Visualización**
-
-Finalmente, para observar de una forma más visual dónde se producen las mayores diferencias entre ambas imágenes, podemos representar las dos juntas así como su diferencia.
-
-```python
-import matplotlib.pyplot as plt
-
-difference = np.abs(original_image_arr - compressed_image_arr)
-
-plt.subplot(1, 3, 1)
-plt.imshow(original_image_arr, cmap='gray')
-plt.title('Original Image')
-plt.axis('off')
-
-plt.subplot(1, 3, 2)
-plt.imshow(compressed_image_arr, cmap='gray')
-plt.title('Compressed Image')
-plt.axis('off')
-
-plt.subplot(1, 3, 3)
-plt.imshow(difference, cmap='gray')
-plt.title('Difference')
-plt.axis('off')
-
-plt.show()
-```
+En la Figura \ref{fig:comparacion_imagenes} se presenta un ejemplo de como podemos comparar una imagen comprimida mediante transformada wavelet discreta de Haar descartando el 20% de los coeficientes de detalle del primer nivel con la imagen original. El ratio de compresión, mayor que uno, indica que la imagen comprimida tiene menor tamaño que la original. El error cuadrático medio mayor que cero nos indica que se ha perdido cierta información de la imagen original y el índice de medida de similitud estructural, próximo a uno nos indica que ambas imágenes son muy similares.
 
 ## Compresión de vídeo utilizando Wavelets
 
