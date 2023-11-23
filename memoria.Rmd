@@ -1,0 +1,414 @@
+---
+title: "Compresión de imágenes y vídeos via wavelets"
+subtitle: "Análisis de señales. Máster en Ciencia de Datos."
+author: "Adrián Lara, Jesús Martínez, Miguel Muñoz, Samuel Ortega, Álex Riera y Pablo Vicente"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+urlcolor: blue
+header-includes:
+   - \usepackage{multirow}
+   - \usepackage{tikz} # Diagramas Latex
+   - \usetikzlibrary{positioning}
+   - \usepackage{float}
+   - \usepackage[font=small,labelfont=bf,labelsep=period]{caption}
+   - \usepackage{subcaption}
+---
+
+```{r setup, include=FALSE}
+base::options(width = 50, digits = 3)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+En este proyecto se presenta un estudio sobre la compresión de imágenes y vídeo utilizando wavelets. Se comienza con una revisión teórica de los fundamentos de los wavelets y su aplicación en la compresión de imágenes. Posteriormente, se extiende el estudio a la compresión de vídeo, donde se analiza la aplicación de los wavelets en la compresión de secuencias de imágenes. Finalmente, se concluye el proyecto con una discusión sobre los resultados obtenidos y las posibles aplicaciones de la compresión de imágenes y vídeo vía wavelets.
+
+# Contenidos teóricos
+
+Como todo buen trabajo, tiene un motivo de interés de estudio detrás; en nuestro caso, nos centramos en la compresión de imágenes y vídeos.
+
+¿Qué es una imagen?
+
+Una imagen puede considerarse como una señal bidimensional en la que cada píxel representa valores de intensidad lumínica o de color en una ubicación específica. Es decir, cada punto de la imagen es un píxel que contiene información sobre su color y posición.
+
+Antes de adentrarnos en el estudio de cómo comprimir vídeos, es fundamental comprender cómo se comprime una imagen. Esencialmente, se trata de representar la información visual de una manera más eficiente, reduciendo la cantidad de datos necesarios para almacenar o transmitir la imagen sin comprometer significativamente su calidad perceptible.
+
+La compresión de imágenes juega un papel crucial en una amplia gama de aplicaciones, desde el almacenamiento eficiente de datos visuales hasta la transmisión rápida y efectiva de información gráfica en diversas plataformas y dispositivos.
+
+La compresión de imágenes hace uso de las transformadas wavelet y sus diversas familias.
+
+Una wavelet u ondícula es una pequeña onda cuya energía está concentrada en un periodo de tiempo limitado. Su forma es la de una onda característica que oscila, lo que permite realizar análisis temporales y frecuenciales. Esta herramienta resulta de gran utilidad en el estudio de fenómenos que varían en el tiempo. La wavelet viene definida por la siguiente ecuacion: $$W_{\psi }(s,\tau ) = \frac{1}{\sqrt{s}}\int_{-\infty }^{\infty }x(t)\cdot \psi (\frac{t-\tau }{s})dt$$
+
+Los coeficientes $W_{\psi }(s,\tau )$ representan los resultados obtenidos al aplicar la transformada. La señal a la que se le aplica esta transformada se denota como $x(t)$, y $\psi (\frac{t-\tau }{s})$ representa la wavelet madre. Esta wavelet madre puede tomar diversas formas según la familia de wavelets que se elija para la transformación.
+
+Dentro de la amplia gama de las familias de wavelets que hay en este trabajo se aplicaron las siguientes familias:
+
+-Haar:
+La transformada de wavelets Haar es la primera que se propuso y es la mas sencilla y simple de todas las familias que existen. Estas son funciones discontinuas y se parece a una funcion escalonada. 
+
+-Daubechies:
+Son una distinguida familia de wavelets ortogonales ampliamente empleadas en el procesamiento de señales y la compresión de datos. Las wavelets de Daubechies se destacan por su habilidad para lograr una compresión significativa de datos, conservando al mismo tiempo una representación precisa de la señal original. Esta capacidad de compresión es una de las características más relevantes y valiosas de las wavelets de Daubechies en diversas aplicaciones.
+
+-Coiflet:
+Las wavelets Coiflet destacan por su notable propiedad de simetría. Una de sus características más sobresalientes es su habilidad para equilibrar la suavidad de una señal con la capacidad de detectar cambios abruptos en ella. En términos generales, estas wavelets comparten similitudes fundamentales con las Daubechies, con la distinción principal de su simetría, que es la marca distintiva de las Coiflet.
+
+-Mexican Hat (Ricker):
+Este tipo de wavelet, también conocida como la wavelet de Ricker o "Mexican Hat", se deriva de una función que es proporcional a la segunda derivada de una función de densidad de probabilidad gaussiana. A diferencia de algunas otras wavelets, no posee una función de escala. Su singularidad radica en su habilidad para detectar y analizar cambios abruptos en una señal, así como para representar tanto componentes de alta frecuencia como de baja frecuencia con precisión y detalle.
+
+-Symlets:
+Esta familia de wavelets guarda similitudes con las wavelets de Daubechies, compartiendo la capacidad de detectar cambios bruscos en señales. No obstante, las wavelets Symlets presentan una leve dosis adicional de asimetría. Esta diferencia en asimetría les confiere una mayor capacidad de representación en comparación con la familia Daubechies, especialmente al analizar ciertos tipos de señales.
+
+-Gabor:
+Las wavelets Gabor, también conocidas como filtros Gabor, poseen la notable capacidad de capturar tanto las características de frecuencia en una señal como su localización precisa en el tiempo. Esta habilidad las convierte en herramientas sumamente útiles en la representación de texturas en imágenes, ya que tienen la capacidad única de detectar y representar las características de diversas escalas y orientaciones.
+
+-Biortogonal:
+Esta familia de wavelets exhibe una notable propiedad: la fase lineal, esencial para la reconstrucción precisa de señales e imágenes. Lo particular de estas wavelets es su enfoque dual, utilizando dos wavelets, una para la descomposición y otra para la reconstrucción, en lugar de depender de una sola wavelet, como suele ser el caso en otras familias.
+
+# Procedimiento práctico
+
+## Búsqueda de referencias o trabajos similares
+
+Previo a la realización de cualquier actividad práctica, se cree conveniente realizar un apequeña revisión bibliográfica con el fin de poder tener una idea de las posibilidades que ofrecen los wavelets. En este rumbo, encontramos los siguientes trabajos:
+
+- Familias de wavelets en Matlab - https://es.mathworks.com/help/wavelet/gs/introduction-to-the-wavelet-families.html
+
+- Introducción a los wavelets en Python - https://www.kaggle.com/code/asauve/a-gentle-introduction-to-wavelet-for-data-analysis
+
+- Conceptos básicos de procesado de señales - https://www.kaggle.com/code/faressayah/signal-processing-with-python
+
+- Paso de la FT a la WT - https://ataspinar.com/2018/12/21/a-guide-for-using-the-wavelet-transform-in-machine-learning/
+
+- Compresión de imágenes usando wavelets - https://ieeexplore.ieee.org/document/801765
+
+- Esquemas descomposición transformada wavelets - http://catarina.udlap.mx/u_dl_a/tales/documentos/meie/rosas_o_mc/capitulo2.pdf
+
+Una vez tenemos una idea preeliminar sobre trabajo que vamos a realizar, las posibilidades dentro del marco de los wavelets y una serie de resultadoos, comenzamos a trabajar de forma práctica.
+
+## Compresión de imágenes en R
+
+Como primer entorno de trabajo, escogimos RStudio, dado que la capacidad del software R para el procesado de señales es bastante elevada. Durante dos semanas estuvimos explorando los distintosd paquetes en R que permitían realizar una transformada de wavelets, tanto discreta como contínua, y haciendo pruebas con la imagen "Lena.png", comunmente utilizada en proyectos de tratamiento de imágenes.
+
+```R
+library(imager) # Librería para importar imágenes y poder procesarlas
+library(waveslim) # Librería para la transformación por wavelets
+
+image_path <- "./data/Lena.png"
+my_image <- load.image(image_path)
+
+# Si la imagen está en RGB, la querremos convertir a escala de grises por simplicidad
+#my_image <- grayscale(my_image)
+
+# Aplicamos DWT
+coeffs <- dwt.2d(my_image, wf = "haar")
+
+# Reconstruimos la imagen usando IDWT
+reconstructed_image <- idwt.2d(coeffs)
+compressed_image <- as.cimg(reconstructed_image)
+
+# Guardamos la imagen
+#save.image(compressed_image, "./data/compressed_image.jpg")
+
+plot(my_image)
+plot(compressed_image)
+```
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{./data/Memoria/r-lena-comparacion.png}
+  \caption{Comparación entre la imagen de Lena original y modificada en R en BW.}
+  \label{fig:compress_image_r}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{./data/Memoria/r-lena-niveles.png}
+  \caption{Visualización de los niveles de la imagen de Lena en R.}
+  \label{fig:niveles_lena_r}
+\end{figure}
+
+Como podemos observar, el código previo nos descompone la imagen en distintas capas, según el valor de los coeficientes de la imagen, y posteriormente reconstruye la imagen original. Este primer código nos permitió comprender el funcionamiento de la transformada de wavelets y cómo, al manipular las capas que conservamos de la descomposición, podemos influir en la compresión de la imagen (quitando detalle, suavizando, qitando ruido...). Pese a esto, no terminamos de hallar métodos para manipular las capas dentro de los objetos de tipo dwt.2d, que son los nativos de esta librería. Por elolo, decidimos trasladar el proyecto a Python, ya que bajo nuestro punto de vista posee un mayor número de librerías con las qu epoder experimentar y trabajar.
+
+## Compresión de imágenes en Python
+
+Pasamos todo el desarrollo práctico del proyecto a Python.
+
+La compresión de imágenes por wavelets es un proceso que utiliza la transformada wavelet discreta 2D para descomponer una imagen en diferentes frecuencias y direcciones. La transformada wavelet discreta 2D se realiza utilizando una familia de wavelets, como `haar`, `db1`, `sym2` o `coif5`. Los coeficientes resultantes se comprimen mediante un umbral suave y se utilizan para reconstruir la imagen comprimida.
+
+El parámetro `wavelet_family` se utiliza para especificar la familia de wavelets a utilizar. Algunas familias populares incluyen `haar`, `db1`, `sym2` y `coif5`. El parámetro `threshold` se utiliza para establecer el valor del umbral suave utilizado para comprimir los coeficientes wavelet. Los coeficientes cuyo valor absoluto es menor que el umbral se establecen en cero, mientras que los coeficientes cuyo valor absoluto es mayor que el umbral se mantienen sin cambios. El parámetro `filter` se utiliza para especificar el tipo de filtro utilizado para la descomposición wavelet.
+
+El proceso de compresión de imágenes por wavelets implica los siguientes pasos:
+
+1. Cargar la imagen original.
+2. Realizar una transformada wavelet discreta 2D en la imagen utilizando una familia de wavelets especificada.
+3. Comprimir los coeficientes resultantes mediante un umbral suave.
+4. Reconstruir la imagen comprimida utilizando los coeficientes comprimidos.
+5. Visualizar la imagen original y la imagen comprimida.
+
+La compresión de imágenes por wavelets puede ser utilizada para reducir el tamaño de las imágenes digitales sin perder demasiada información visual. Sin embargo, es importante tener en cuenta que la calidad de la imagen comprimida depende del valor del umbral suave utilizado y de la familia de wavelets seleccionada.
+
+### Compresión manual de imágenes BW single-level
+
+En primer lugar, implementamos wavelets discretas definiendo las transformaciones directas e inversas como la convolución de las imágenes con los coeficientes correspondientes.
+
+Aplicando la transformación directa sobre la imagen, obtenemos los coeficientes de aproximación y detalle. La compresión se realiza filtrando los coeficientes de detalle con un valor umbral, definido como un porcentaje del valor máximo en la imagen.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{./data/Memoria/py-lena-manual-coif1-0.1.png}
+  \caption{Compresión manual de Lena con Coiflet 1 y umbral = 0.1.}
+  \label{fig:compr_lena_manual_py}
+\end{figure}
+
+### Compresión de imágenes RGB single-level con PyWavelets
+
+Para la realización de la Transformada Discreta Wavelet 2D, así como de su inversa, lo más cómodo en Python es hacer uso de la librería `PyWavelets`, la cual puede instalarse haciendo uso de `pip install PyWavelets`.
+
+#### Función diseñada para el análisis y su aplicación
+
+Una función fue diseñada (ver código) para realizar esta a nivel único (`single level`), de tal forma que se puede analizar rápidamente una imagen comprimida por la transformación wavelet para un determinado nivel de aproximación y detalle. Esto se hizo principalmente gracias a las funciones `wavedec2` e `idwt2` del módulo de [PyWavelets](https://pywavelets.readthedocs.io/en/latest/ref/2d-dwt-and-idwt.html). Nuestra función `compress_image` a su vez permite trabajar tanto con imágenes en escala de grises como en RGB. Posee la capacidad de elegir entre los distintos tipos de `wavelet`, `modos de thresholding` o valor de `threshold`. $\\$
+
+La aplicación de `compress_image` a una imagen (presente en `"./data/genshin.jpg"`) muestra lo siguiente:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{./data/Memoria/Compress_image_genshin.png}
+  \caption{Visualización de la aproximación y de los detalles horizontales, verticales y diagonales en una fotografía en RGB.}
+  \label{fig:compress_image_1}
+\end{figure}
+
+En la Figura \ref{fig:compress_image_1} se aprecia una representación en escala de grises de lo que capturan nuestros coeficientes Wavelet para cada uno de los canales de la imagen: Red, Green y Blue. En este caso el análisis se hace para el primer nivel, mostrando los detalles horizontales, verticales y diagonales, en ese orden. $\\$
+
+Por otra parte, se tiene una compración entre la imagen original y la comprimida.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{./data/Memoria/Compress_image_genshin_2.png}
+  \caption{Comparación entre la imagen original y modificada en el caso RGB.}
+  \label{fig:compress_image_2}
+\end{figure}
+
+Apreciamos en la Figura \ref{fig:compress_image_2} que nuestra compresión ha utilizado el Wavelet `haar`, un `threshold` de 100 y con un modo `hard`, obteniendo una reducción del 65.98 % del tamaño inicial.
+
+Un ejemplo en blanco y negro también es posible realizarlo, usando la imagen presente en `"./data/nino.jpg"`.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{./data/Memoria/Compress_image_nino.png}
+  \caption{Visualización de la aproximación y de los detalles horizontales, verticales y diagonales en una fotografía en escala de grises.}
+  \label{fig:compress_image_3}
+\end{figure}
+
+En la Figura \ref{fig:compress_image_3} pueden apreciarse claramente los detalles según la dirección, resultando muy interesante a nivel teórico. La comparación entre la imagen original y comprimida se muestra a continuación.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{./data/Memoria/Compress_image_nino_2.png}
+  \caption{Comparación entre imagen original y modificada en el caso de escala de grises.}
+  \label{fig:compress_image_4}
+\end{figure}
+
+La reducción en tamaño en este caso es del 77.38 %. Nótese que se ha utilizado en este caso el modo de thresholding `soft`, lo que permite en la mayoría de casos una reducción de ruido sin sacrificar demasiados detalles importantes, tal y como se aprecia en este caso.
+
+**Nota**: los detalles han sido en todos los casos ecualizados utilizando la función `exposure.equalize_hist()` del módulo `exposure` de la biblioteca `scikit-learn`. Esto es muy útil pues permite el resalte de los detalles para que sean visibles al lector.
+
+**Aplicación de la función**: en el código se ha añadido una forma de comprimir una carpeta completa de imágenes con la correspondiente creación de otra comprimida. ¡Esto permite al usuario reducir el tamaño de sus imágenes si no quiere usar un .zip! 
+
+#### Comparación entre distintos wavelets, threshold values y modos
+
+Para hacer una comparación entre lo que se obtiene con distintos wavelets, valores de umbral y modos de aplicación de esos umbrales lo único que se tuvo que hacer fue iterar llamando a la función `compress_image` con los distintos valores deseados. Un ejemplo de ello se muestra en la Figura \ref{fig:comparacion}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\textwidth]{./data/Memoria/Comparacion.png}
+  \caption{Comparación entre distintos wavelets, valores umbral y modos de threshold.}
+  \label{fig:comparacion}
+\end{figure}
+
+Puede observarse una cierta tendencia del modo `soft` a oscurecer la imagen en un intento de suavizar los coeficientes. El modo `garrote`, por otra parte, tiende a ser algo agresivo como `hard` para valores de coeficientes altos (los deja prácticamente igual). Sin embargo, este representa una transición entre `soft` y `hard` al comportarse de manera similar a `soft` para valores bajos. Es inmediato también apreciar cómo un aumento en el threshold acompaña un incremento en la reducción del tamaño de la imagen.
+
+#### Búsqueda de un threshold adecuado para un porcentaje de reducción deseado
+
+La función propia diseñada llamada `find_optimal_threshold` nos permite que dada una imagen, una compresión buscada con una familia y modo de thresholding fijo, obtener el threshold adecuado para un porcentaje de compresión buscado. Esta función básicamente itera de forma optimizada (con un paso adaptativo) sobre las distintas imágenes que se generarían para un threshold dado (ver código). El proceso iterativo para la imagen `"./data/genshin.jpg" se muestra en la siguiente Figura.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{./data/Memoria/Find_threshold_image.png}
+  \caption{Representación del proceso iterativo en la búsqueda de la reducción deseada.}
+  \label{fig:find_threshold}
+\end{figure}
+
+Observamos que el *threshold final* que nos ofrece esta función sería 290. La razón por la que no se llega estrictamente a la reducción deseada es por una tolerancia implementada para evitar un bucle muy largo. La imagen con esta compresión se muestra a continuación.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\textwidth]{./data/Memoria/Find_threshold_image_2.png}
+  \caption{Imagen obtenida tras la búsqueda de la reducción deseada.}
+  \label{fig:threshold_image}
+\end{figure}
+
+### Compresión de imágenes multi-level
+
+**MIGUEL¿?**
+
+Índice de Similitud Estructural (SSIM): 0.7848317931724772
+
+Error Cuadrático Medio (MSE): 254.84636306762695
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{./data/Memoria/py-lena-comp-miguel.png}
+  \caption{ESCRIBIR}
+  \label{fig:miguel-fig-1}
+\end{figure}
+
+#### Nivel máximo de descomposición
+
+La función dwtn_max_level de la librería pywavelets devuelve el nivel máximo de descomposción en que podemos comprimir la imagen (por ejemplo utilizando las función wavedec2) con una determinada familia de wavelets. Esta función es en realidad una generalización para señales n-dimensionales de la función dwt_max_level, la cuál determina el nivel máximo para la descomposición de una señal unidimensional. La función dwt_max_level calcula el nivel máximo de descomposición como el nivel donde hay al menos un coeficiente que no se ve afectado por los efectos de borde. Los efectos de borde son problemas que pueden surgir cuando se aplica una transformada wavelet en los bordes de una señal (en este caso la imagen) debido a la naturaleza finita de la señal y al hecho que las funciones wavelet requieren de un número mínimo de muestras para calcularse adecuadamente. También se puede interpretar este nivel máximo como si la descomposición parase cuando la señal se vuelve más pequeña que la FIR (finite impulse response) del filtro asociado a la wavelet. La expresión analítica de este nivel viene dada por:
+
+max_level = log_2[data_len/(filter_len - 1)] donde data_len y filter_len son los tamaños de la señal original y el filtro respectivamente,
+
+En el caso de señales n-dimensionales, el nivel máximo de descomposición es el mínimo de los niveles máximos calcukados para todos los n ejes.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{./data/Memoria/py-max-descomp.png}
+  \caption{Representación de la descomposición por niveles en Python.}
+  \label{fig:miguel-fig-2}
+\end{figure}
+
+#### Métodos de comparación de la imagen original y la comprimida
+
+Una vez reaizada la compresión, resulta siempre interesante comparar la imagen comprimida con la imagen original, ya que típicamente queremos mantener un equilbrio entre la compresión de la imagen y su calidad, de manera que se parezca lo máximo posible a la imagen original.
+
+Como ya hemos comentado anteriormente, para comprimir la imagen por el método de las wavelet, dividimos la información de la imagen en subseñales de aproximación y detalle aplicando a la imagen una (o varias) transformaciones wavelet. Los coeficientes de aproximación proporcionan la teendencia general de los píxeles mientras que los coeficientes de detalle proporcionan los cambios o detalles en las direcciones horizontal, vertical y diagonal de la imagen. Para comprimir la imagen establecemos un umbral o "threshold", que no es más que un valor de los coeficientes de detalle por debajo del cual los coeficientes son aproximados a cero. Cuanto mayor sea el número de ceros, mayor podrá ser la compresión alcanzada. Sin embargo, al hacer cero estos coeficientes se pierde cierta cantidad de información de la imagen original. Cuantos más coeficientes se hagan cero mayor será la compresión pero será mayor la pérdida de información de la imagen original, por lo que se debe buscar un balance entre ambos. Por ello, para cuantificar la compresión de la imagen y su semejanza con la imagen original podemos emplear diversos métodos:
+
++ **Ratio de compresión**
+
+```python
+import os
+
+# Obtener el tamaño de los archivos de las imágenes original y comprimida
+size_original = os.path.getsize('original_image.jpg')  # Tamaño en bytes
+size_compressed = os.path.getsize('compressed_image.jpg')  # Tamaño en bytes
+
+# Calcular el ratio de compresión
+compression_ratio = size_compressed / size_original
+```
+
+El ratio de compresión es el ratio entre el tamaño de la imagen comprimida y la original. Esre ratio es un indicador cuánto se ha comprimido una imagen en particular. Generalmente, cuanto mayor es el ratio de compresión peor es la calidad de la imagen.
+
++ **Energía perdida**
+
+```python
+import numpy as np
+
+energy_loss = 100*np.sum(compressed_image_arr**2)/np.sum(original_image_arr**2)
+```
+En el contexto del procesado de señales, la energía de una imagen es proporcional a la suma del cuadrado de los valores sus píxeles y es una medida de la información presente en la imagen. Por tanto, la pérdida de información puede cuantificarse en forma de la pérdida de energía de la imagen en tanto por cien (energy loss).
+
++ **Error cuadrático medio**
+
+Otra manera de cuantificar la perdida de información o la diferencia entre la imagen original y la comprimida es mediante el error cuadrático medio, es decir, el error acumulado en cada pixel correspondiente a la imagen original y su análogo en la imagen comprimida al cuadrado.
+
+```python
+import numpy as np
+
+mse = np.sum((original_imagea_arr -  compress_image_arr)**2)/float(original_image_arr-shape[0]*original_image_arr.shape[1])
+```
+
++ **Índice de Medida de Similitud Estructural (SSIM)**
+
+Este índice también sirve para determinar la similitud de dos imágenes. En particular mide la similitud estructural entre ambas, teniendo en cuenta la luminancia, contraste y estructura. Toma valores entre -1 y 1 siendo 1 el índice para imágenes idénticas, por lo que valores próximos a 1 indican alta similitud. La obtención de este índice es más complejo por lo que podemos usar librerías externas para calcularlo.
+
+```python
+from skimage.measure import compare_ssim as ssim
+
+ssim_val = ssim(original_img_arr, decoded_img_arr)
+```
+
++ **Visualización**
+
+Finalmente, para observar de una forma más visual dónde se producen las mayores diferencias entre ambas imágenes, podemos representar las dos juntas así como su diferencia.
+
+```python
+import matplotlib.pyplot as plt
+
+difference = np.abs(original_image_arr - compressed_image_arr)
+
+plt.subplot(1, 3, 1)
+plt.imshow(original_image_arr, cmap='gray')
+plt.title('Original Image')
+plt.axis('off')
+
+plt.subplot(1, 3, 2)
+plt.imshow(compressed_image_arr, cmap='gray')
+plt.title('Compressed Image')
+plt.axis('off')
+
+plt.subplot(1, 3, 3)
+plt.imshow(difference, cmap='gray')
+plt.title('Difference')
+plt.axis('off')
+
+plt.show()
+```
+
+## Compresión de vídeo utilizando Wavelets
+
+La compresión de video utilizando wavelets sigue la evolución natural de nuestro proyecto donde hemos iniciado aplicando esta transformada para una imagen y ahora lo hacemos para múltiples imagenes ya que un video no es más que una sucesión de imagenes o frames consecutivos uno detras de otro. Por este motivo se nos ocurrió la forma más intuitiva de comprimir un video mediante wavelets que se resume en lo siguiente:
+
+1. Separar el video en frames
+
+2. Aplicación de la transformada para cada frame
+
+3. Volver a unir los frames para obtener el video comprimido
+
+A continuación nos dedicaremos a explicar cada paso del proceso de forma detallada.
+
+### Separar el video en frames
+
+Para ilustrar todo el proceso utilizamos el archivo llamado `baile.mp4`, aunque se podría utilizar cualquier archivo de video de tipo **.mp4**. El códec de video del video es **H264**, *verémos que es importante despúes*, el peso del archivo es de **1.17 MB**. Nuestro objetivo es tratar de comprimir el video lo máximo posible tratando de comprometer la calidad lo mínimo posible.
+
+Mediante el paquete open-cv de Python, podemos dividir el video en frames, en este caso, el video se convierte en 344 frames de peso **7,45 MB**, esto podría parecer poco intuitivo, lo lógico es pensar que si dividimos un video en frames, la suma de estos debería ser igual al peso del video, sin embargo, a los videos se les aplican códecs que comprimen el tamaño de los frames sin apenas influir en la calidad, por lo tanto, al obtener los frames individuales, se descomprimen y pesan más que el video. Esto nos indica que cuando queramos comparar el video original con el que se le ha aplicado la transformación, deben estar en el mismo códec, en este caso **H264**.
+
+Los frames resultantes se almacenan en una carpeta en el directorio `./data/frames_video_original`. El tipo de archivo de las imagenes es **JPEG**.
+
+### Aplicación de la transformada para cada frame
+
+Para aplicar la transformada, como para otras partes del proyecto, se utiliza el paquete **pywavelets** entre otros. En primer lugar creamos una nueva carpeta para almacenar los que serán los frames transformados, la ruta es `./data/frames_modificados`, luego de forma iterativa vamos aplicando el siguiente proceso a cada frame:
+
+1. Aplicamos la transformada wavelet, en este caso debauchies, *db4 en python*, y cuantos niveles de descomposición en aproximación y detalles queremos, para el ejemplo hemos utilizado 3. No ha sido necesario utilizar los frames en escala de grises dado que pywavelets opera correctamente con imagenes a color.
+
+2. Se obtienen los coeficientes de aproximación y los de detalles. De estos, solo nos quedamos con el último coeficiente de aproximación y con los coeficientes de detalle en el mismo nivel y por encima de los del coeficiente de aproximación.
+
+3. Creamos un threshold adaptativo que consiste en utilizar un percentil como límite, todo valor por debajo de ese percentil se le asigna el valor 0, mientras que aquellos valores por encima del umbral no sufren cambios. Estos son los valores de los coeficientes que mayor información aportan sobre la imagen. Le aplicamos el umbral a los coeficientes de detalle que están en el mismo nivel que los de aproximación mientras que el resto de detalles no se les aplica dicho threshold.
+
+4. Realizamos la transformada wavelet inversa con los nuevos coeficientes de aproximación y detalle que hemos obtenido, reconstruyendo así la imagen ya transformada, aplicando la wavelet debauchies.
+
+5. Guardamos los frames dentro de la carpeta directorio.
+
+\begin{figure}[H]
+  \centering
+  \hfill
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=0.8\textwidth]{./data/Memoria/frame_0.jpg}
+    \caption{Primer frame del vídeo original.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=0.8\textwidth]{./data/Memoria/reconstructed_frame_0.jpg}
+    \caption{Primer frame del vídeo reconstruido.}
+  \end{subfigure}
+  \hfill
+  \caption{Comparación de frames en la compresión de vídeo.}
+\end{figure}
+
+### Volver a unir los frames para obtener el video comprimido
+
+Una vez tenemos los frames transformados, realizamos el proceso de reconversión a video. Establecemos el directorio de salida del que será el video resultante, `./data/video_salida.mp4`, hay que establecer el número de frames por segundo (fps) del video, el estándar son 30 fps. La librería **open-cv** de Python, no permite utilizar el códec **H264**, por lo que inicialmente, el video se codifica con el tipo **XVID** y luego mediante el uso de la libreria **moviepy**, lo recodificamos a **H264** de nuevo. El resultado final se encuentra en `./data/video_convertido.mp4`, el peso del nuevo video es de **655 KB** por lo que al final se aprecia una reducción significativa del tamaño del archivo. En cuanto a la pérdida de calidad, apenas se perciben cambios visuales entre los videos.
