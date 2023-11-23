@@ -7,16 +7,45 @@ import numpy as np
 class Wavelet_compressor:
     def __init__(self, root):
         self.root = root
-        self.root.title("Compresor WAVELETS de imágenes")
+        self.root.title("Wavelet Compressor")
         self.root.geometry("800x630+10+10")
 
         self.original_image_path = ''
         self.is_original_image   = False
         self.is_compressed_image = False
 
+        self.create_intro()
+    
+    def create_intro(self):
         # Título de la aplicación
-        self.title_text = tk.Label(master = self.root, text = "Compresor WAVELETS de imágenes", font = ("Consolas", 25))
+        self.title_text = tk.Label(master = self.root, text = "Wavelet Compressor", font = ("Consolas", 30))
         self.title_text.pack(pady = 5)
+
+        # Frame de intro
+        self.frm_w = 400
+        self.frm_h = 400
+        self.frm_intro = tk.Frame(master = self.root, width = self.frm_w, height = self.frm_h)
+        self.frm_intro.pack()
+
+        self.canvas = tk.Canvas(master = self.frm_intro, width = self.frm_w, height = self.frm_h)
+        self.canvas.pack(pady = 20)
+
+        image_path = 'logo-sin-fondo.png'
+        logo = Image.open(image_path)
+        logo = logo.resize((self.frm_w, self.frm_h), Image.LANCZOS)
+        self.logo = ImageTk.PhotoImage(logo)
+        self.canvas.create_image(0, 0, anchor = tk.NW, image = self.logo)
+
+        self.start_button = tk.Button(master = self.frm_intro, text = "Iniciar aplicación", font = ("Consolas", 14), height = 2, width = 20, command = self.on_start_button_click)
+        self.start_button.pack(pady = 20)
+
+    def on_start_button_click(self):
+
+        self.frm_intro.pack_forget()
+        self.frm_intro.destroy()
+        self.create_main()
+
+    def create_main(self):
 
         # Canvas para mostrar las imágenes
         self.frm_w = 700
