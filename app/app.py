@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from PIL import Image, ImageTk, ImageOps
-import pywt, os
+from PIL import Image, ImageTk
+import pywt, os, random
 import numpy as np
 
 class Wavelet_compressor:
@@ -17,6 +17,18 @@ class Wavelet_compressor:
         self.create_intro()
     
     def create_intro(self):
+
+        # Crear la toolbar
+        toolbar = tk.Frame(self.root, bg = "lightgray")
+        toolbar.pack(side = tk.TOP, fill = tk.X)
+
+        # Crear la barra de menús
+        menu_bar = tk.Menu(self.root)
+        root.config(menu = menu_bar)
+
+        # Añadir el menú de ayuda
+        menu_bar.add_cascade(label = "Ayuda", menu = self.show_help_menu())
+
         # Título de la aplicación
         self.title_text = tk.Label(master = self.root, text = "Wavelet Compressor", font = ("Consolas", 30))
         self.title_text.pack(pady = 5)
@@ -36,17 +48,39 @@ class Wavelet_compressor:
         self.logo = ImageTk.PhotoImage(logo)
         self.canvas.create_image(0, 0, anchor = tk.NW, image = self.logo)
 
-        self.start_button = tk.Button(master = self.frm_intro, text = "Iniciar aplicación", font = ("Consolas", 14), height = 2, width = 20, command = self.on_start_button_click)
+        self.frm_start = tk.Frame(master = self.root)
+        self.frm_start.pack()
+        self.start_button = tk.Button(master = self.frm_start, text = "Iniciar aplicación", font = ("Consolas", 14), height = 2, width = 20, command = self.on_start_button_click)
         self.start_button.pack(pady = 20)
 
     def on_start_button_click(self):
+        self.frm_start.pack_forget()
+        self.frm_start.destroy()
+        self.load_main()
 
-        self.frm_intro.pack_forget()
-        self.frm_intro.destroy()
-        self.create_main()
+    def load_main(self):
+        # Barra de carga
+        self.load_canvas = tk.Canvas(self.frm_intro, width = 288, height = 50, bg = "black")
+        self.load_canvas.pack()
+        blocks = [self.create_green_block(i * 60, 0) for i in range(5)]
+        self.root.after(1000, self.show_next_block, blocks)
+
+    def create_green_block(self, x, y):
+        return self.load_canvas.create_rectangle(x, y, x + 50, y + 55, fill = "green", state = tk.HIDDEN)
+
+    def show_next_block(self, block_list):
+        if block_list:
+            block = block_list.pop(0)
+            self.load_canvas.itemconfigure(block, state=tk.NORMAL)
+            random_delay = int(random.uniform(100, 1000))
+            root.after(random_delay, self.show_next_block, block_list)
+        else:
+            self.frm_intro.pack_forget()
+            self.frm_intro.destroy()
+            self.create_main()
 
     def create_main(self):
-
+        
         # Canvas para mostrar las imágenes
         self.frm_w = 700
         self.frm_h = 400
@@ -150,6 +184,7 @@ class Wavelet_compressor:
             self.update_image(image_type = "original")
 
     def load_image(self, image_path):
+        self.canvas.delete('all')
         if self.color_mode == "color":
             image_obj = Image.open(image_path)
             img_array = np.array(image_obj)
@@ -162,13 +197,35 @@ class Wavelet_compressor:
             if self.rotate:
                 img_array = np.fliplr(np.transpose(img_array, (1, 0)))
                 image_obj = Image.fromarray(img_array)
-        image_obj = image_obj.resize((int(self.frm_w / 2), self.frm_h), Image.LANCZOS) # CALCULAR RESIZE PARA MANTENER PROPORCIONES
+        image_obj = self.resize_image(image_obj, self.frm_w / 2, self.frm_h)
         image_obj = ImageTk.PhotoImage(image_obj)
         self.original_image_path  = image_path
         self.image_dir_text.config(text = self.original_image_path)
         self.original_image_array = img_array
         self.original_image       = image_obj
         self.is_original_image    = True
+
+    def resize_image(self, image, target_width, target_height):
+        aspect_ratio = image.width / image.height
+        if (image.width <= target_width) and (image.height <= target_height):
+            new_width = image.width
+            new_height = image.height
+        elif (image.width > target_width) and (image.height <= target_height):
+            new_width = target_width
+            new_height = new_width / aspect_ratio
+        elif (image.width <= target_width) and (image.height > target_height):
+            new_height = target_height
+            new_width = new_height * aspect_ratio
+        else:
+            if (image.width / target_width) > (image.height / target_height):
+                new_width = target_width
+                new_height = int(new_width / aspect_ratio)
+            else:
+                new_height = target_height
+                new_width = int(new_height * aspect_ratio)
+        resized_image = image.resize((int(new_width), int(new_height)), Image.LANCZOS)
+
+        return resized_image
 
     def on_rotate_button_click(self):
         if self.is_original_image:
@@ -342,11 +399,23 @@ class Wavelet_compressor:
 
         reconstructed_image_array = np.clip(reconstructed_image_array, 0, 255).astype(np.uint8)
         reconstructed_image = Image.fromarray(reconstructed_image_array)
-        reconstructed_image = reconstructed_image.resize((int(self.frm_w / 2), self.frm_h), Image.LANCZOS) # CALCULAR RESIZE PARA MANTENER PROPORCIONES
+        reconstructed_image = self.resize_image(reconstructed_image, self.frm_w / 2, self.frm_h)
         self.compressed_image_array = reconstructed_image_array
         self.compressed_image = ImageTk.PhotoImage(reconstructed_image)
         self.is_compressed_image = True
         return True
+    
+    def show_help_menu(self):
+        help_menu = tk.Menu(root)
+        help_menu.add_command(label = "Ayuda", command = self.show_help)
+        help_menu.add_command(label = "Sobre Wavelet Compressor", command = self.show_about)
+        return help_menu
+    
+    def show_help(self):
+        messagebox.showinfo("Ayuda", "Si necesita ayuda, envíe un md a Jesús Martínez Leal. Si es urgente, etiquete el mensaje con la palabra clave *uwu*.")
+
+    def show_about(self):
+        messagebox.showinfo("Sobre Wavelet Compressor", "Wavelet Compressor v1.0\nDeveloped by Samuel Ortega & co.")
 
 if __name__ == "__main__":
     root = tk.Tk()
