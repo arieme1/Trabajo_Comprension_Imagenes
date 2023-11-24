@@ -268,7 +268,7 @@ Observamos que el *threshold final* que nos ofrece esta función sería 290. La 
   \label{fig:threshold_image}
 \end{figure}
 
-Obviamente la calidad de la imagen obtenida no es la deseada, lo que nos permite recalcar que el tema de compresión es un tema de mucha variabilidad dependiente a lo que el usuario desee obtener.
+La calidad de la imagen obtenida no alcanza los estándares deseados. Esto subraya la variabilidad significativa asociada con el tema de la compresión, la cual depende en gran medida de las preferencias del usuario y de lo que este desee obtener.
 
 ### Descomposición multinivel de imágenes
 
@@ -278,7 +278,7 @@ La librería PyWavelets incorpora numerosas funciones para aplicar transformacio
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{./data/Memoria/descomposicion_multinivel.png}
-  \caption{RepresentaciÓn esquemática de la descomposición de una imagen en distintos niveles aplicando el algoritmo de Mallat.}
+  \caption{Representación esquemática de la descomposición de una imagen en distintos niveles aplicando el algoritmo de Mallat.}
   \label{fig:descomposicion_niveles}
 \end{figure}
 
@@ -397,7 +397,7 @@ A continuación nos dedicaremos a explicar cada paso del proceso de forma detall
 
 ### Separar el vídeo en frames
 
-Para ilustrar todo el proceso utilizamos el archivo llamado `baile.mp4`, aunque se podría utilizar cualquier archivo de video de tipo **.mp4**. El códec del vídeo es **H264**, *veremos que es importante despúes*, el peso del archivo es de **1.17 MB**. Nuestro objetivo es tratar de comprimir el vídeo lo máximo posible tratando de comprometer la calidad lo mínimo posible.
+Para ilustrar todo el proceso utilizamos el archivo llamado `baile.mp4`, aunque se podría utilizar cualquier archivo de video de tipo **.mp4**. El códec del vídeo es **H264**, *veremos que es importante después*, el peso del archivo es de **1.17 MB**. Nuestro objetivo es tratar de comprimir el vídeo lo máximo posible tratando de comprometer la calidad lo mínimo posible.
 
 Mediante el paquete `open-cv` de Python, podemos dividir el vídeo en frames, en este caso, el vídeo se convierte en 344 frames de peso **7,45 MB**, esto podría parecer poco intuitivo, lo lógico es pensar que si dividimos un video en frames, la suma de estos debería ser igual al peso del video. Sin embargo, a los vídeos se les aplican códecs que comprimen el tamaño de los frames sin apenas influir en la calidad. Por lo tanto, al obtener los frames individuales, se descomprimen y pesan más que este. Esto nos indica que cuando queramos comparar el vídeo original con el que se le ha aplicado la transformación, deben estar en el mismo códec, en este caso **H264**.
 
@@ -407,13 +407,13 @@ Los frames resultantes se almacenan en una carpeta en el directorio `./data/fram
 
 Para aplicar la transformada, como para otras partes del proyecto, se utiliza el paquete **pywavelets** entre otros. En primer lugar creamos una nueva carpeta para almacenar los que serán los frames transformados, la ruta es `./data/frames_modificados`, luego de forma iterativa vamos aplicando el siguiente proceso a cada frame:
 
-1. Aplicamos la transformada wavelet, en este caso debauchies, *db4 en python*, y cuantos niveles de descomposición en aproximación y detalles queremos, para el ejemplo hemos utilizado 3. No ha sido necesario utilizar los frames en escala de grises dado que pywavelets opera correctamente con imagenes a color.
+1. Aplicamos la transformada wavelet, en este caso daubechies, *db4 en python*, y cuantos niveles de descomposición en aproximación y detalles queremos, para el ejemplo hemos utilizado 3. No ha sido necesario utilizar los frames en escala de grises dado que pywavelets opera correctamente con imagenes a color.
 
 2. Se obtienen los coeficientes de aproximación y los de detalles. De estos, solo nos quedamos con el último coeficiente de aproximación y con los coeficientes de detalle en el mismo nivel y por encima de los del coeficiente de aproximación.
 
 3. Creamos un threshold adaptativo que consiste en utilizar un percentil como límite, todo valor por debajo de ese percentil se le asigna el valor 0, mientras que aquellos valores por encima del umbral no sufren cambios. Estos son los valores de los coeficientes que mayor información aportan sobre la imagen. Le aplicamos el umbral a los coeficientes de detalle que están en el mismo nivel que los de aproximación mientras que el resto de detalles no se les aplica dicho threshold.
 
-4. Realizamos la transformada wavelet inversa con los nuevos coeficientes de aproximación y detalle que hemos obtenido, reconstruyendo así la imagen ya transformada, aplicando la wavelet debauchies.
+4. Realizamos la transformada wavelet inversa con los nuevos coeficientes de aproximación y detalle que hemos obtenido, reconstruyendo así la imagen ya transformada, aplicando la wavelet daubechies.
 
 5. Guardamos los frames dentro de la carpeta directorio.
 
@@ -451,7 +451,7 @@ En concreto, el menú principal de nuestra GUI, representado en la Figura \ref{f
  
  - Panel de imagen: es un `Frame` que contiene distintos `Buttons` y `Labels`. Este panel permite cargar la imagen, corregir su rotación, cambiar entre color y BW y guardar la imagen comprimida.
 
- - Panel de compresión: también es un `Frame`, contenedor de `Buttons`, `Labels`y un `Spinbox`. Estos controles modifican la familia, la wavelet, y el threshold de compresión.
+ - Panel de compresión: también es un `Frame`, contenedor de `Buttons`, `Labels` y un `Spinbox`. Estos controles modifican la familia, la wavelet, y el threshold de compresión.
 
 \begin{figure}[H]
   \centering
