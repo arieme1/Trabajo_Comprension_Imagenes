@@ -438,3 +438,52 @@ Para aplicar la transformada, como para otras partes del proyecto, se utiliza el
 ### Volver a unir los frames para obtener el vídeo comprimido
 
 Una vez tenemos los frames transformados, realizamos el proceso de reconversión a video. Establecemos el directorio de salida del que será el vídeo resultante, `./data/video_salida.mp4`, hay que establecer el número de frames por segundo (fps) del vídeo, el estándar son 30 fps. La librería **open-cv** de Python, no permite utilizar el códec **H264**, por lo que inicialmente, el vídeo se codifica con el tipo **XVID** y luego mediante el uso de la librería **moviepy**, lo recodificamos a **H264** de nuevo. El resultado final se encuentra en `./data/video_convertido.mp4`, el peso del nuevo vídeo es de **655 KB** por lo que al final se aprecia una reducción significativa del tamaño del archivo. En cuanto a la pérdida de calidad, apenas se perciben cambios visuales entre los vídeos.
+
+# Producto final: Wavelet Compressor
+
+La compresión de imágenes es directamente aplicable en el día a día. Por ello, decidimos unir los conocimientos desarrollados en esta memoria para crear una interfaz de usuario gráfica (GUI) que permita aplicar la compresión con wavelets de manera rápida y sencilla.
+
+**Wavelet Compressor** está basada en la librería `tkinter` de Python. Esta librería es, a su vez, una interfaz de Tk para Python, escrita en el lenguaje de programación Tcl/Tk. Su implementación en Python es intuitiva: creamos una clase base, comúnmente llamada `root`, sobre la que vamos añadiendo distintos `Frames`. Dentro de los `Frames` podemos posicionar distintos elementos de entre una gran variedad: `canvas`, `Label`, `Button`, `Spinbox`, etc. Cada uno de estos elementos se ordena dentro de su `Frame` padre controlando su geometría con uno de los métodos disponibles: `pack()`, `grid()` o `place()`.
+
+En concreto, el menú principal de nuestra GUI, representado en la Figura \ref{fig:app2}, cuenta con los siguientes elementos principales:
+
+ - Display de imágenes: es un único `canvas` sobre el cual calculamos dónde y con qué tamaño han de ser representadas las imágenes.
+ 
+ - Panel de imagen: es un `Frame` que contiene distintos `Buttons` y `Labels`. Este panel permite cargar la imagen, corregir su rotación, cambiar entre color y BW y guardar la imagen comprimida.
+
+ - Panel de compresión: también es un `Frame`, contenedor de `Buttons`, `Labels`y un `Spinbox`. Estos controles modifican la familia, la wavelet, y el threshold de compresión.
+
+\begin{figure}[H]
+  \centering
+  \hfill
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=0.8\textwidth]{./data/Memoria/app1.png}
+    \caption{Pantalla de carga.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=0.8\textwidth]{./data/Memoria/app2.png}
+    \caption{Pantalla principal.}
+    \label{fig:app2}
+  \end{subfigure}
+  \hfill
+  \caption{Paneles principales de la GUI \textbf{Wavelet Compressor}.}
+\end{figure}
+
+# Conclusiones
+
+El presente trabajo ha explorado exhaustivamente la aplicación de técnicas de compresión utilizando wavelets en el ámbito de imágenes y vídeos, abordando tanto aspectos teóricos como prácticos. A continuación, se presentan las conclusiones más relevantes obtenidas a lo largo de la investigación:
+
+El análisis teórico proporcionado en la sección de Contenidos Teóricos ha sentado las bases fundamentales para comprender el funcionamiento de las transformadas wavelet en la compresión de información visual. La comprensión de conceptos clave, como la descomposición multinivel y los métodos de comparación, ha permitido contextualizar de manera efectiva los procedimientos prácticos implementados.
+
+El procedimiento práctico ha abordado la compresión de imágenes tanto en R como en Python, destacando la versatilidad y eficiencia de PyWavelets en la manipulación de imágenes en niveles de gris y color. La implementación de la descomposición multinivel ha demostrado ser una estrategia efectiva para la compresión sin pérdida de detalles significativos.
+
+En el caso de la compresión de vídeo, la metodología seguida, que implica la separación en frames, la aplicación de la transformada a cada uno y la posterior reconstrucción, ha evidenciado la aplicabilidad de las wavelets en este contexto, logrando una reducción de tamaño sin comprometer de manera significativa la calidad visual.
+
+La culminación de los esfuerzos prácticos se traduce en el desarrollo de el producto final: **Wavelet Compressor**. Esta herramienta integra las técnicas discutidas y aplicadas, ofreciendo una solución versátil para la compresión de imágenes mediante wavelets. Su diseño modular y la posibilidad de ajustar parámetros clave hacen de esta herramienta una opción valiosa para aquellos que buscan una compresión eficiente y adaptable.
+
+En conclusión, la investigación ha revelado que la aplicación de wavelets en la compresión de imágenes y vídeos es una estrategia viable y efectiva. La comparación de distintos wavelets, valores de umbral y modos de compresión ha permitido identificar configuraciones óptimas para distintos casos de uso.
+
+Este trabajo no solo contribuye al entendimiento teórico de las wavelets en el contexto de la compresión, sino que también proporciona una implementación práctica que puede ser aprovechada en diversos escenarios.
