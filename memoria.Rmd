@@ -274,6 +274,7 @@ Obviamente la calidad de la imagen obtenida no es la deseada, lo que nos permite
 
 La librería PyWavelets incorpora numerosas funciones para aplicar transformaciones wavelet a señales n-dimensionales. En este trabajo, ya que nos centramos en imágenes (señales bidimensionales), empleamos principalmente las funciones `dwt2` e `idwt2`, que nos permiten obtener la descomposición wavelet de nuestras imágenes y reconstruirlas a partir de los coeficientes de la transformación.  Además de estas funciones, PyWavelets también incorpora las funciones `wavedec2` y `waverec2` para el análisis multirresolución de las imágenes aplicando el algoritmo de Mallat. En este algoritmo, un nuevo nivel de descomposición se logra al aplicar de nuevo la transformación wavelet sobre los coeficietnes de aproximación el nivel anterior.
 
+
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{./data/Memoria/descomposicion_multinivel.png}
