@@ -84,6 +84,8 @@ Esta familia de wavelets exhibe una notable propiedad: la fase lineal, esencial 
 
 # Procedimiento práctico
 
+El código utilizado para el desarrollo de este apartado está disponible en el repositorio de GitHub: [https://github.com/esedesam/Trabajo_Compresion_Imagenes.git](https://github.com/esedesam/Trabajo_Compresion_Imagenes.git).
+
 ## Búsqueda de referencias o trabajos similares
 
 Previo a la realización de cualquier actividad práctica, se cree conveniente realizar una pequeña revisión bibliográfica con el fin de poder tener una idea de las posibilidades que ofrecen los wavelets. En este rumbo, encontramos los siguientes trabajos:
@@ -471,6 +473,8 @@ En concreto, el menú principal de nuestra GUI, representado en la Figura \ref{f
   \hfill
   \caption{Paneles principales de la GUI \textbf{Wavelet Compressor}.}
 \end{figure}
+
+Es posible descargar la versión más actualizada de **Wavelet Compressor** desde el siguiente enlace: [https://go.uv.es/saorme/wavelet-compressor](https://go.uv.es/saorme/wavelet-compressor).
 
 # Conclusiones
 
