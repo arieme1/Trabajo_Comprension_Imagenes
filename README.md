@@ -1,4 +1,4 @@
-# Comprensión de imágenes
+# Compresión de imágenes
 
 ![Logo de la ETSE - UV](./images/etse_logo.jpg)
 
